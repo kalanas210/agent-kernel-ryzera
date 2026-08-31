@@ -47,6 +47,7 @@ VOICE_TOOLS: dict[str, Callable[..., str]] = {
     "add_appliance": tool.add_appliance,
     "record_bill_reading": tool.record_bill_reading,
     "compute_current_bill": tool.compute_current_bill,
+    "compute_time_of_use_bill": tool.compute_time_of_use_bill,
     "find_savings": tool.find_savings,
 }
 
@@ -110,6 +111,20 @@ VOICE_TOOL_DECLARATIONS: list[types.FunctionDeclaration] = [
         "aloud exactly as written; the numeric total is for your reasoning only.",
         {},
         [],
+    ),
+    _decl(
+        "compute_time_of_use_bill",
+        "Compute a Domestic Time-of-Use (TOU) bill from the three metered readings the caller reads "
+        "aloud: off-peak, day, and peak units. Use THIS instead of compute_current_bill whenever the "
+        "caller says their meter or bill has separate off-peak/day/peak figures. Say the returned "
+        "total_spoken aloud exactly as written; the numeric total is for your reasoning only.",
+        {
+            "off_peak_units": types.Schema(type=types.Type.NUMBER, description="units the caller read for off-peak"),
+            "day_units": types.Schema(type=types.Type.NUMBER, description="units the caller read for day time"),
+            "peak_units": types.Schema(type=types.Type.NUMBER, description="units the caller read for peak time"),
+            "billing_days": types.Schema(type=types.Type.INTEGER, description="0 keeps the current period"),
+        },
+        ["off_peak_units", "day_units", "peak_units"],
     ),
     _decl(
         "find_savings",

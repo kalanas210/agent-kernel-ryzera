@@ -51,6 +51,25 @@ def test_bad_arguments_return_structured_error_not_exception() -> None:
     assert result["ok"] is False and "argument" in result["error"]
 
 
+def test_voice_path_can_compute_a_time_of_use_bill() -> None:
+    """Regression: compute_time_of_use_bill was missing from VOICE_TOOLS, so a
+    caller on Domestic Time-of-Use got no deterministic answer at all on a call
+    (the model guessed a number instead). Pin the real reading from a live bug
+    report: 80 off-peak, 150 day, 20 peak -> Rs 14,676.92, not a hallucination."""
+
+    async def scenario():
+        executor = _executor()
+        return await executor.call(
+            "compute_time_of_use_bill", {"off_peak_units": 80, "day_units": 150, "peak_units": 20}
+        )
+
+    result = asyncio.run(scenario())
+
+    assert result["ok"] is True
+    assert result["total"] == 14676.92
+    assert "total_spoken" in result
+
+
 def test_voice_writes_are_visible_to_the_text_chat_path() -> None:
     """The demo's money shot: a call and the chat share one session profile."""
 
